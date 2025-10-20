@@ -72,7 +72,7 @@ class _MyAppState extends State<MyApp> {
         _status = 'Plugin initialized. Click the button to convert.';
       });
     } catch (e) {
-      print('Failed to initialize PcmToOgg plugin: $e');
+      });
       setState(() {
         _initError = 'Failed to load plugin: $e';
         _status = _initError;
@@ -134,13 +134,11 @@ class _MyAppState extends State<MyApp> {
         _status =
             'Conversion successful in ${stopwatch.elapsedMilliseconds}ms! OGG data size: ${oggData.lengthInBytes} bytes.';
         _oggData = oggData;
-        print(_status);
       });
     } catch (e) {
       setState(() {
         _status = 'An error occurred during conversion: $e';
       });
-      print(_status);
     }
   }
 
@@ -148,7 +146,6 @@ class _MyAppState extends State<MyApp> {
     if (_oggData == null) return;
 
     try {
-      print('Playing audio from memory...');
       await _audioPlayer.play(BytesSource(_oggData!));
       setState(() {
         _status = 'Playing audio...';
@@ -160,7 +157,6 @@ class _MyAppState extends State<MyApp> {
         });
       });
     } catch (e) {
-      print('Error playing audio: $e');
       setState(() {
         _status = 'Error playing audio: $e';
       });

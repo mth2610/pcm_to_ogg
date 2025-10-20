@@ -4,14 +4,8 @@ import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
-import 'package:http/http.dart' as http;
 
 import '../pcm_to_ogg_platform_interface.dart';
-
-// Extension for global WebAssembly access
-extension type _WebAssembly._(JSObject _) implements JSObject {
-  external JSPromise instantiate(JSAny buffer, JSObject importObject);
-}
 
 // Extension for the result of WebAssembly.instantiate
 extension type WasmInstantiateResult._(JSObject _) implements JSObject {
@@ -78,7 +72,6 @@ class PcmToOggWeb extends PcmToOggPlatform {
 
     // 1. If the factory doesn't exist, inject the script and wait for it.
     if (!globalContext.hasProperty('PcmToOggModuleFactory'.toJS).toDart) {
-      print('PcmToOggWeb: Module factory not found. Injecting script...');
       final script = html.ScriptElement()
         ..type = 'module'
         ..innerHtml = '''
@@ -88,30 +81,24 @@ class PcmToOggWeb extends PcmToOggPlatform {
       html.document.head!.append(script);
 
       // 2. Poll to check when the factory is available.
-      // This is robust against onLoad not firing for cached scripts.
       const maxRetries = 200; // Wait up to 10 seconds
       var retries = 0;
       while (!globalContext.hasProperty('PcmToOggModuleFactory'.toJS).toDart) {
         if (retries++ > maxRetries) {
           throw Exception('PcmToOggWeb: Timed out waiting for PcmToOggModuleFactory.');
         }
-        // print('PcmToOggWeb: Waiting for module factory...');
         await Future.delayed(const Duration(milliseconds: 50));
       }
     }
-
-    print('PcmToOggWeb: Module factory is available. Initializing module...');
 
     // Now, PcmToOggModuleFactory should be globally available.
     final createModule = globalContext['PcmToOggModuleFactory'] as JSFunction;
     final modulePromise = createModule.callAsFunction(globalContext) as JSPromise;
     final module = (await modulePromise.toDart) as JSObject;
-    print('PcmToOggWeb: Module instance created.');
 
     _wasmExports = _WasmExports._(module);
 
     _isInitialized = true;
-    print('PcmToOggWeb: Initialization complete.');
   }
 
   @override
