@@ -72,7 +72,6 @@ class _MyAppState extends State<MyApp> {
         _status = 'Plugin initialized. Click the button to convert.';
       });
     } catch (e) {
-      });
       setState(() {
         _initError = 'Failed to load plugin: $e';
         _status = _initError;
