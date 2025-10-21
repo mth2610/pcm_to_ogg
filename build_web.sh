@@ -16,12 +16,14 @@ mkdir -p $OUTPUT_DIR
 
 echo "Compiling for WebAssembly in RELEASE mode..."
 source /Users/mth2610/Desktop/flutter_plugins/emsdk/emsdk_env.sh
+
 emcc \
     $OPTIMIZATION_FLAGS \
     -s MALLOC=emmalloc \
     -s ALLOW_MEMORY_GROWTH=1 \
     -s EXPORT_ES6=1 -s MODULARIZE=1 -s EXPORT_NAME='createPcmToOggModule' \
     -s "EXPORTED_FUNCTIONS=['_malloc', '_free', '_encode_pcm_to_ogg', '_get_ogg_output_data', '_get_ogg_output_size', '_free_ogg_output']" \
+    -s "EXPORTED_RUNTIME_METHODS=['HEAPF32', 'HEAPU8']" \
     -I src/third_party/libogg-1.3.5/include \
     -I src/third_party/libvorbis-1.3.7/include \
     -I src/third_party/libvorbis-1.3.7/lib \

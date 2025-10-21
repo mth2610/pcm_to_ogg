@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:pcm_to_ogg/pcm_to_ogg_web.dart';
 
 import 'src/pcm_to_ogg_platform_interface.dart';
 
@@ -26,15 +27,13 @@ class MethodChannelPcmToOgg extends PcmToOggPlatform {
     required int sampleRate,
     double quality = 0.4,
   }) async {
-    final Uint8List? result = await methodChannel.invokeMethod<Uint8List>(
-      'convert',
-      {
-        'pcmData': pcmData,
-        'channels': channels,
-        'sampleRate': sampleRate,
-        'quality': quality,
-      },
-    );
+    final Uint8List? result = await methodChannel
+        .invokeMethod<Uint8List>('convert', {
+          'pcmData': pcmData,
+          'channels': channels,
+          'sampleRate': sampleRate,
+          'quality': quality,
+        });
     return result!;
   }
 }
