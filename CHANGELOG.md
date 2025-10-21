@@ -7,3 +7,7 @@
 ## 1.0.1
 
 * Fix syntax errors in example
+
+## 1.0.3
+
+* Fix web 

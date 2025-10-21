@@ -1,6 +1,6 @@
 name: pcm_to_ogg
 description: A cross-platform Flutter plugin to convert raw PCM audio data to the Ogg Vorbis format using native libraries for performance and WebAssembly for web support.
-version: 1.0.1
+version: 1.0.2
 homepage: https://github.com/mth2610/pcm_to_ogg
 repository: https://github.com/mth2610/pcm_to_ogg
 issue_tracker: https://github.com/mth2610/pcm_to_ogg/issues
