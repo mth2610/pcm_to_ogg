@@ -8,6 +8,6 @@
 
 * Fix syntax errors in example
 
-## 1.0.3
+## 1.0.
 
 * Fix web 
