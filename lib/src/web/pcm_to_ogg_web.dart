@@ -67,17 +67,13 @@ class PcmToOggWeb extends PcmToOggPlatform {
   PcmToOggWeb();
 
   Future<void> initialize() async {
-    print('Entering initialize method.');
     if (_isInitialized && _wasmModule != null && _wasmExports != null) {
-      print('Wasm module already initialized and valid.');
       return;
     }
-    print('Initializing Wasm module...');
     _isInitialized = false; // Đặt lại cờ nếu có gì đó không ổn
 
     // 1. If the factory doesn't exist, inject the script and wait for it.
     if (!globalContext.hasProperty('PcmToOggModuleFactory'.toJS).toDart) {
-      print('PcmToOggModuleFactory not found, injecting script...');
       final script = html.ScriptElement()
         ..type = 'module'
         ..innerHtml = '''
@@ -97,21 +93,15 @@ class PcmToOggWeb extends PcmToOggPlatform {
         }
         await Future.delayed(const Duration(milliseconds: 50));
       }
-      print('PcmToOggModuleFactory found after injection.');
-    } else {
-      print('PcmToOggModuleFactory already exists.');
-    }
+    } else {}
 
     final createModule = globalContext['PcmToOggModuleFactory'] as JSFunction;
-    print('createModule function obtained.');
     final modulePromise =
         createModule.callAsFunction(globalContext) as JSPromise;
-    print('modulePromise obtained.');
 
     final module = (await modulePromise.toDart) as JSObject;
-    print('Wasm module loaded (promise resolved).');
 
-    // *** SỬA LỖI: Chờ cho runtime C++ sẵn sàng ***
+    // Chờ cho runtime C++ sẵn sàng ***
     final completer = Completer<void>();
     bool runtimeReady = false;
 
@@ -121,17 +111,12 @@ class PcmToOggWeb extends PcmToOggPlatform {
     if (module.hasProperty('calledRun'.toJS).toDart &&
         calledRunProp is JSBoolean &&
         calledRunProp.toDart) {
-      print('Runtime was already initialized (calledRun=true).');
       runtimeReady = true;
     } else {
-      print(
-        'Module has not run yet. Setting up onRuntimeInitialized callback...',
-      );
       // Gán callback
       module.setProperty(
         'onRuntimeInitialized'.toJS,
         () {
-          print('onRuntimeInitialized callback fired!');
           runtimeReady = true;
           if (!completer.isCompleted) {
             completer.complete();
@@ -146,21 +131,13 @@ class PcmToOggWeb extends PcmToOggPlatform {
     }
     // *** KẾT THÚC SỬA LỖI ***
 
-    print('Wasm runtime is now ready.');
     _wasmModule = module;
     _wasmExports = _WasmExports._(module);
-    print('Wasm module exports obtained.');
 
     // Kiểm tra nhanh xem HEAPF32 có thực sự tồn tại không
-    if (!_wasmExports!.hasProperty('HEAPF32'.toJS).toDart ||
-        _wasmExports!.HEAPF32 == null) {
-      print('FATAL ERROR: Module does not have HEAPF32 even after init.');
+    if (!_wasmExports!.hasProperty('HEAPF32'.toJS).toDart) {
       throw Exception('PcmToOggWeb: HEAPF32 not found on Wasm module.');
-    } else {
-      print('HEAPF32 property is valid.');
     }
-
-    print('Wasm module initialization completed.');
     _isInitialized = true;
   }
 
@@ -171,7 +148,6 @@ class PcmToOggWeb extends PcmToOggPlatform {
     required int sampleRate,
     double quality = 0.4,
   }) async {
-    print('Entering convert method. _isInitialized: $_isInitialized');
     await initialize();
 
     if (_wasmExports == null || _wasmModule == null) {
@@ -204,11 +180,7 @@ class PcmToOggWeb extends PcmToOggPlatform {
           pcmData.toJS,
           pcmPtr >> 2,
         ); // set(source, targetOffset)
-
-        print('Set operation completed.');
-      } catch (e, s) {
-        print('Error writing to Wasm memory: $e');
-        print('Stack trace: $s');
+      } catch (e) {
         throw Exception('Failed to write PCM data to Wasm heap.');
       }
 
@@ -244,7 +216,6 @@ class PcmToOggWeb extends PcmToOggPlatform {
           );
         }
         if (size == 0) {
-          print('Wasm function returned zero size. Returning empty list.');
           return Uint8List(0);
         }
 
@@ -258,10 +229,9 @@ class PcmToOggWeb extends PcmToOggPlatform {
         // Giải phóng con trỏ kết quả (struct)
         _wasmExports!.free_ogg_output(resultPtr.toJS);
       }
-    } catch (e, s) {
-      print('Caught a general exception in convert: $e');
-      print('Stack trace: $s');
-      return Uint8List(0);
+    } catch (e) {
+      throw Exception('Caught a general exception in convert: $e');
+      // return Uint8List(0);
     } finally {
       // Luôn giải phóng bộ đệm PCM đã cấp phát
       _wasmExports!.free(pcmPtr.toJS);

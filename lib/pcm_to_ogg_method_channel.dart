@@ -1,7 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:pcm_to_ogg/pcm_to_ogg_web.dart';
-
 import 'src/pcm_to_ogg_platform_interface.dart';
 
 /// An implementation of [PcmToOggPlatform] that uses method channels.
